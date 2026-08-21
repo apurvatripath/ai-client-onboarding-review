@@ -34,6 +34,16 @@ A successful review returns `success`, `submissionId`, `reviewStatus`, `extracte
 
 The importable workflow is at `.n8n/ai-client-onboarding-document-review.json`. Follow `docs/n8n-setup.md` and use `docs/google-sheets-schema.csv` for the `Reviews` header row.
 
+## Fictional test briefs
+
+The `output/pdf` directory contains three safe demonstration fixtures:
+
+- `complete-fictional-client-brief.pdf` should return `COMPLETE`.
+- `missing-information-fictional-client-brief.pdf` should return `MISSING_INFORMATION`.
+- `conflicting-fictional-client-brief.pdf` should return `MANUAL_REVIEW`.
+
+Regenerate them with `python scripts/generate-fixtures.py`. They contain no real client data.
+
 ## Local configuration
 
 Copy .env.example values into runtime environment variables. Never place real values in source files:
