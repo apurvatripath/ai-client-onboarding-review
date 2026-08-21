@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="A self-initiated demonstration of secure client onboarding and human-approved AI document review.">
+    <title>Client Intake Review | Demonstration</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles.css">
+    <script src="/app.js" defer></script>
+</head>
+<body>
+<header class="site-header">
+    <a class="brand" href="/" aria-label="Intake review demonstration home">
+        <span class="brand-mark" aria-hidden="true">AR</span>
+        <span>Intake Review</span>
+    </a>
+    <span class="demo-label">Self-initiated demonstration</span>
+</header>
+
+<main>
+    <section class="intro" aria-labelledby="page-title">
+        <div class="eyebrow">CLIENT OPERATIONS AUTOMATION</div>
+        <h1 id="page-title">Turn a new client brief into a review-ready handoff.</h1>
+        <p class="intro-copy">
+            Collect the essential project details and one supporting document.
+            The workflow validates the intake, extracts structured information and prepares
+            missing-item follow-up for a person to approve.
+        </p>
+
+        <ol class="process-list" aria-label="Review process">
+            <li>
+                <span class="step-number">01</span>
+                <div>
+                    <strong>Validate the intake</strong>
+                    <p>Required details, URL, date, document type and size are checked first.</p>
+                </div>
+            </li>
+            <li>
+                <span class="step-number">02</span>
+                <div>
+                    <strong>Review the document</strong>
+                    <p>AI extracts agreed fields and explains anything missing or uncertain.</p>
+                </div>
+            </li>
+            <li>
+                <span class="step-number">03</span>
+                <div>
+                    <strong>Keep a person in control</strong>
+                    <p>The review is recorded and any follow-up remains a draft until approved.</p>
+                </div>
+            </li>
+        </ol>
+
+        <aside class="trust-note">
+            <span aria-hidden="true">✓</span>
+            <p>No message is sent automatically. This demo uses fictional test documents only.</p>
+        </aside>
+    </section>
+
+    <section class="form-card" aria-labelledby="form-title">
+        <div class="form-heading">
+            <div>
+                <p class="form-kicker">New client intake</p>
+                <h2 id="form-title">Project details</h2>
+            </div>
+            <span class="required-note">* Required</span>
+        </div>
+
+        <form id="onboarding-form" novalidate>
+            <div class="field-grid">
+                <div class="field">
+                    <label for="companyName">Company name *</label>
+                    <input id="companyName" name="companyName" type="text" minlength="2" maxlength="120" autocomplete="organization" required>
+                    <p class="field-error" id="companyName-error"></p>
+                </div>
+
+                <div class="field">
+                    <label for="website">Website *</label>
+                    <input id="website" name="website" type="url" maxlength="250" placeholder="https://example.com" autocomplete="url" required>
+                    <p class="field-error" id="website-error"></p>
+                </div>
+
+                <div class="field">
+                    <label for="contactName">Primary contact *</label>
+                    <input id="contactName" name="contactName" type="text" minlength="2" maxlength="80" autocomplete="name" required>
+                    <p class="field-error" id="contactName-error"></p>
+                </div>
+
+                <div class="field">
+                    <label for="contactEmail">Work email *</label>
+                    <input id="contactEmail" name="contactEmail" type="email" maxlength="160" autocomplete="email" required>
+                    <p class="field-error" id="contactEmail-error"></p>
+                </div>
+            </div>
+
+            <div class="field">
+                <label for="serviceRequested">Service requested *</label>
+                <input id="serviceRequested" name="serviceRequested" type="text" minlength="2" maxlength="120" placeholder="e.g. Client onboarding automation" required>
+                <p class="field-error" id="serviceRequested-error"></p>
+            </div>
+
+            <div class="field">
+                <label for="desiredStartDate">Desired start date *</label>
+                <input id="desiredStartDate" name="desiredStartDate" type="date" required>
+                <p class="field-error" id="desiredStartDate-error"></p>
+            </div>
+
+            <div class="field">
+                <label for="notes">Context for the reviewer</label>
+                <textarea id="notes" name="notes" rows="4" maxlength="1000" placeholder="Important scope, dependencies or timing notes"></textarea>
+                <div class="field-meta"><span>Optional</span><span id="notes-count">0 / 1000</span></div>
+                <p class="field-error" id="notes-error"></p>
+            </div>
+
+            <div class="field">
+                <label for="document">Project brief *</label>
+                <label class="upload-zone" for="document">
+                    <span class="upload-icon" aria-hidden="true">↑</span>
+                    <span>
+                        <strong id="upload-title">Choose one supporting document</strong>
+                        <small id="upload-detail">PDF, JPG or PNG · maximum 5 MB</small>
+                    </span>
+                </label>
+                <input class="file-input" id="document" name="document" type="file" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" required>
+                <p class="field-error" id="document-error"></p>
+            </div>
+
+            <div id="form-status" class="form-status" role="status" aria-live="polite"></div>
+
+            <button id="submit-button" type="submit">
+                <span>Review onboarding pack</span>
+                <span aria-hidden="true">→</span>
+            </button>
+        </form>
+
+        <section id="result-panel" class="result-panel" hidden aria-live="polite">
+            <div class="result-topline">
+                <span id="result-badge" class="result-badge"></span>
+                <span>Approval: Pending</span>
+            </div>
+            <h3 id="result-title"></h3>
+            <p id="result-reason"></p>
+            <div id="missing-wrapper" hidden>
+                <h4>Missing information</h4>
+                <ul id="missing-list"></ul>
+            </div>
+            <div id="draft-wrapper" class="draft-box" hidden>
+                <div>
+                    <span>Follow-up draft</span>
+                    <strong>Human approval required</strong>
+                </div>
+                <p id="draft-copy"></p>
+            </div>
+            <p class="submission-reference">Reference: <span id="submission-id"></span></p>
+            <button id="new-submission" class="secondary-button" type="button">Start another review</button>
+        </section>
+    </section>
+</main>
+</body>
+</html>
+
