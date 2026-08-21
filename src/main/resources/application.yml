@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: ai-client-onboarding-review
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 6MB
+
+app:
+  onboarding:
+    webhook-url: ${N8N_ONBOARDING_WEBHOOK_URL:}
+    webhook-auth-token: ${N8N_ONBOARDING_WEBHOOK_AUTH_TOKEN:}
+    max-file-size-bytes: ${ONBOARDING_MAX_FILE_SIZE_BYTES:5242880}
+
