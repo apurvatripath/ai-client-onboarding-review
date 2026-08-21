@@ -17,6 +17,23 @@ onboarding form + one PDF/image -> Spring Boot validation -> secured n8n webhook
 
 No accounts, multi-tenancy, billing, document-management suite, legal/compliance claims or automatic communication.
 
+## API contract
+
+`POST /api/onboarding` accepts `multipart/form-data` with these names:
+
+- `companyName`
+- `website`
+- `contactName`
+- `contactEmail`
+- `serviceRequested`
+- `desiredStartDate`
+- `notes` (optional)
+- `document`
+
+A successful review returns `success`, `submissionId`, `reviewStatus`, `extractedFields`, `missingFields`, `reviewReason`, `followUpDraft` and `approvalStatus`. Validation failures use HTTP 400 and `VALIDATION_ERROR`; unavailable automation uses HTTP 502 and `AUTOMATION_UNAVAILABLE`.
+
+The importable workflow is at `.n8n/ai-client-onboarding-document-review.json`. Follow `docs/n8n-setup.md` and use `docs/google-sheets-schema.csv` for the `Reviews` header row.
+
 ## Local configuration
 
 Copy .env.example values into runtime environment variables. Never place real values in source files:
@@ -25,3 +42,9 @@ Copy .env.example values into runtime environment variables. Never place real va
 - N8N_ONBOARDING_WEBHOOK_AUTH_TOKEN
 - ONBOARDING_MAX_FILE_SIZE_BYTES (optional; defaults to 5 MiB)
 
+## Verify locally
+
+```powershell
+D:\Programs\Maven\apache-maven-3.9.16\bin\mvn.cmd test
+D:\Programs\Maven\apache-maven-3.9.16\bin\mvn.cmd package
+```

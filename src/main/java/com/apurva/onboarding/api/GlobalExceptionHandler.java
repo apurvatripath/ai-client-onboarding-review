@@ -4,6 +4,7 @@ import com.apurva.onboarding.service.AutomationUnavailableException;
 import com.apurva.onboarding.service.InvalidDocumentException;
 import com.apurva.onboarding.service.InvalidSubmissionException;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -52,5 +53,14 @@ public class GlobalExceptionHandler {
                 List.of()
         );
     }
-}
 
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    ApiErrorResponse handleMaximumUploadSize() {
+        return ApiErrorResponse.of(
+                "VALIDATION_ERROR",
+                "Please correct the highlighted fields.",
+                List.of(new FieldErrorDetail("document", "The document must be 5 MB or smaller."))
+        );
+    }
+}
