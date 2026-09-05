@@ -5,3 +5,8 @@ target/
 .env
 *.log
 tmp/
+data/
+.runtime/
+samples/private/
+output/accuracy/
+__pycache__/

@@ -1,0 +1,23 @@
+{
+  "documentType": "INTAKE_FORM",
+  "label": "Replace with your independently labelled real intake-form dataset",
+  "documents": [
+    {
+      "file": "your-intake-form.pdf",
+      "fields": {
+        "companyName": "Northstar Studio",
+        "contactName": "Alex Morgan",
+        "contactEmail": "alex@example.com",
+        "serviceRequested": "Client onboarding automation",
+        "budget": "USD 2400",
+        "targetLaunchDate": "2026-09-30",
+        "projectSummary": "Build a validated intake workflow.",
+        "dependencies": null
+      },
+      "lineItems": [
+        {"description": "Workflow setup", "quantity": "1", "unitPrice": "USD 2400"}
+      ],
+      "reviewStatus": "MISSING_INFORMATION"
+    }
+  ]
+}

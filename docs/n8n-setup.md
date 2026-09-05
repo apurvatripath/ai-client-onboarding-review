@@ -1,5 +1,7 @@
 # n8n setup
 
+**Legacy path only.** The current local hardening build uses Spring Boot extraction and the durable Sheet outbox in `extraction.md`. Do not import or activate this workflow for the hardening build. This retained guide documents the earlier demo, not the current idempotent path.
+
 Import `.n8n/ai-client-onboarding-document-review.json` into the self-hosted n8n instance, then configure it without placing secrets in this repository.
 
 1. Assign a Header Auth credential to the `Validated Onboarding Webhook` node. The header name must be `X-Webhook-Token` and its value must match `N8N_ONBOARDING_WEBHOOK_AUTH_TOKEN` in the Spring Boot runtime.

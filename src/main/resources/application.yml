@@ -1,3 +1,7 @@
+server:
+  address: 127.0.0.1
+  port: ${EXTRACTION_PORT:8091}
+
 spring:
   application:
     name: ai-client-onboarding-review
@@ -11,4 +15,3 @@ app:
     webhook-url: ${N8N_ONBOARDING_WEBHOOK_URL:}
     webhook-auth-token: ${N8N_ONBOARDING_WEBHOOK_AUTH_TOKEN:}
     max-file-size-bytes: ${ONBOARDING_MAX_FILE_SIZE_BYTES:5242880}
-
