@@ -8,5 +8,6 @@ tmp/
 data/
 .runtime/
 samples/private/
+test-data/
 output/accuracy/
 __pycache__/
