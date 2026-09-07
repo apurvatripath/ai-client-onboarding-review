@@ -20,6 +20,8 @@ let currentId = null;
 let documentUrl = null;
 
 loadQueue();
+const deepLinkId = new URLSearchParams(location.search).get("id");
+if (deepLinkId) loadItem(deepLinkId);
 
 async function loadQueue() {
     const response = await fetch("/api/extractions/review-queue");

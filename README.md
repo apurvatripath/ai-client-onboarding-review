@@ -2,6 +2,14 @@
 
 **81.67% field accuracy across 60 real, independently-labelled receipts** (public ICDAR2019 SROIE dataset, live `gemini-3.6-flash`, no cherry-picking) — company 81.67%, date 91.67%, address 55.0%, total 98.33%. That's a different document schema than the shipped intake form below (receipts vs. agency intake forms); it's an isolated proof that the extraction *approach* holds up on genuinely messy real documents, not the intake-form number itself. See [Real receipts](#real-receipts--a-different-schema-run-as-isolated-proof) for full methodology and the honest scope note.
 
+The human review queue in action — a document with a genuinely conflicting field (the same demo form states two different budgets across its two pages) gets flagged instead of silently resolved, then corrected and approved:
+
+| Flagged for review | Corrected and approved |
+|---|---|
+| ![Review queue flagging a conflicting field](docs/images/review-flagged.png) | ![Review queue after correction and approval](docs/images/review-approved.png) |
+
+Real screenshots of the running app, not mockups — same fictional demo document used throughout this README.
+
 Standalone hardening of the existing service demo: **English agency intake forms only**, preserving the original eight fields and adding service-table rows (`description`, `quantity`, `unitPrice`). No SaaS, accounts, billing, or automatic communication.
 
 Upload → page text → structured extraction → OCR fallback → field review → durable audit/result → optional Google Sheets outbox.
