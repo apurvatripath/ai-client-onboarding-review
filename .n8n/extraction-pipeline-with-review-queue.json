@@ -1,0 +1,225 @@
+{
+  "name": "Document Extraction + Human Review Queue",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "document-review",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [-1120, 300],
+      "id": "b1a1a111-1111-4111-8111-111111111111",
+      "name": "Receive Document",
+      "webhookId": "CONFIGURE_AFTER_IMPORT"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ ($env.EXTRACTION_SERVICE_URL || 'http://localhost:8091') + '/api/extractions' }}",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "document",
+              "inputDataFieldName": "document"
+            },
+            {
+              "name": "submissionId",
+              "value": "={{ $json.submissionId || '' }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-880, 300],
+      "id": "b1a1a111-1111-4111-8111-111111111112",
+      "name": "Extract Document (calls this pipeline)"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1a1a111-1111-4111-8111-111111111113",
+              "leftValue": "={{ $json.reviewStatus }}",
+              "rightValue": "COMPLETE",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [-620, 300],
+      "id": "b1a1a111-1111-4111-8111-111111111114",
+      "name": "Review Status = COMPLETE?"
+    },
+    {
+      "parameters": {
+        "notes": "Everything came back ACCEPTED with high confidence and grounded evidence -- continue this workflow exactly as you would after any other step (write to the client's CRM, trigger the next stage, etc). Nothing extraction-specific needed here."
+      },
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [-360, 160],
+      "id": "b1a1a111-1111-4111-8111-111111111115",
+      "name": "Continue Your Workflow"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d1a1a111-1111-4111-8111-111111111116",
+              "name": "reviewLink",
+              "type": "string",
+              "value": "={{ ($env.EXTRACTION_SERVICE_URL || 'http://localhost:8091') + '/review.html?id=' + $json.submissionId }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-360, 440],
+      "id": "b1a1a111-1111-4111-8111-111111111117",
+      "name": "Build Review Link"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "CONFIGURE_AFTER_IMPORT",
+        "sendBody": true,
+        "contentType": "json",
+        "jsonBody": "={{ JSON.stringify({ text: 'Document needs a human: ' + $('Extract Document (calls this pipeline)').item.json.submissionId + ' is ' + $('Extract Document (calls this pipeline)').item.json.reviewStatus + ' (' + $('Extract Document (calls this pipeline)').item.json.reviewQueue.length + ' field(s) flagged). Review: ' + $json.reviewLink }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-100, 440],
+      "id": "b1a1a111-1111-4111-8111-111111111118",
+      "name": "Notify Reviewer (Slack/Discord/etc)",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $('Extract Document (calls this pipeline)').item.json }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [160, 300],
+      "id": "b1a1a111-1111-4111-8111-111111111119",
+      "name": "Return Extraction Result"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Receive Document": {
+      "main": [
+        [
+          {
+            "node": "Extract Document (calls this pipeline)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Document (calls this pipeline)": {
+      "main": [
+        [
+          {
+            "node": "Review Status = COMPLETE?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Review Status = COMPLETE?": {
+      "main": [
+        [
+          {
+            "node": "Continue Your Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Build Review Link",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Continue Your Workflow": {
+      "main": [
+        [
+          {
+            "node": "Return Extraction Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Review Link": {
+      "main": [
+        [
+          {
+            "node": "Notify Reviewer (Slack/Discord/etc)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify Reviewer (Slack/Discord/etc)": {
+      "main": [
+        [
+          {
+            "node": "Return Extraction Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "f2b2b222-2222-4222-8222-222222222222",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}

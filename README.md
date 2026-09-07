@@ -84,3 +84,5 @@ Result: **81.67% field accuracy across all 60 receipts** (company 81.67%, date 9
 - `GET /api/extractions/pending-sheet`, `POST /api/extractions/sync-sheet`: inspect/drain the durable outbox. Sync is disabled until explicitly configured.
 
 See [operating details](docs/extraction.md) for Sheet setup, confidence rules, limits, recovery and test evidence. Runtime data, OCR dependencies, private samples and accuracy reports are git-ignored. Keep the H2 store: deleting it loses deduplication history and Sheet row ownership.
+
+**n8n template:** `.n8n/extraction-pipeline-with-review-queue.json` wraps this API as an importable workflow — a webhook calls this pipeline, routes on `reviewStatus`, and notifies a reviewer with a direct `/review.html?id=...` link when a human is needed. See [n8n setup](docs/n8n-setup.md).
