@@ -10,6 +10,8 @@ The human review queue in action — a document with a genuinely conflicting fie
 
 Real screenshots of the running app, not mockups — same fictional demo document used throughout this README.
 
+**Technical writeup:** [Where naive document extraction breaks at volume](docs/writeup-naive-extraction-breaks.md) — the four specific gaps between a demo and something you'd trust in front of a client (retry semantics, idempotency, confidence gating, audit trail), and what this pipeline actually does about each one.
+
 Standalone hardening of the existing service demo: **English agency intake forms only**, preserving the original eight fields and adding service-table rows (`description`, `quantity`, `unitPrice`). No SaaS, accounts, billing, or automatic communication.
 
 Upload → page text → structured extraction → OCR fallback → field review → durable audit/result → optional Google Sheets outbox.
