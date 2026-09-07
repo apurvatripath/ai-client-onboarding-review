@@ -16,6 +16,10 @@ Low confidence (below 0.85), malformed fields or incomplete tables first trigger
 
 The compatibility onboarding endpoint additionally compares submitted form values against extracted fields. Conflicts are persisted and audited. Reprocessing the document alone resets extraction; resubmit the form to reapply its comparison. Its original multipart fields and success response remain compatible with the existing UI.
 
+## Human review UI
+
+`/review.html` lists every submission whose `reviewQueue` is non-empty and not yet `APPROVED`, and shows the source document beside the editable extracted fields/line items for the selected one. `GET /api/extractions/{id}/document` serves the original bytes (content-type sniffed from the file, not stored separately); documents processed before this feature was added have no stored bytes and the page says so instead of showing a blank frame. `POST /api/extractions/{id}/review` applies corrections (each corrected field/cell is set to `ACCEPTED`, confidence `1.0`, source `human-review`) and, when `approve:true`, sets `approvalStatus` to `APPROVED`; approval clears the queue item even if permanent page-level issues remain on the record, since those are no longer something a person still needs to act on. Every correction is audited as its own `HUMAN_REVIEW` event alongside the existing pipeline stages.
+
 ## Durability and recovery
 
 `EXTRACTION_DATA_DIR` defaults to `data/extraction/`. H2 persists hashes, ID aliases, results, append-only application audit events and Sheet row assignments with synchronous writes. H2 prevents a second process using the same database. Repeat bytes return the canonical result even under a new ID. Reusing an ID for different bytes returns HTTP 409 on the extraction API. An interrupted reservation can resume with the same ID; an interrupted attempt remains visible as a start without a finish.

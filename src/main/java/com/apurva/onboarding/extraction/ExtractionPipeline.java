@@ -32,6 +32,7 @@ public class ExtractionPipeline {
         if(requestedId==null || requestedId.isBlank()) requestedId="doc-"+hash;
         if(!requestedId.matches("[a-zA-Z0-9_-]{1,100}")) throw new IllegalArgumentException("submissionId must be 1-100 letters, digits, hyphens or underscores");
         String id=store.reserve(requestedId,hash);
+        store.saveDocumentBytes(id,bytes);
         ExtractionResult cached=store.get(id);
         if(cached!=null && !reprocess) { event(id,hash,0,"CACHE_HIT",Map.of("requestedId",requestedId)); return cached; }
         event(id,hash,0,"RECEIVED",Map.of("reprocess",reprocess,"bytes",bytes.length));
@@ -89,6 +90,51 @@ public class ExtractionPipeline {
             event(id,hash,0,"INPUT_REJECTED",Map.of("error",e.getMessage()));
             throw e;
         }
+    }
+    /** Human corrections go through the same canonicalization/validation as model output, then re-derive the review state with the identical rule process() uses. */
+    public synchronized ExtractionResult review(String id, Map<String,String> fieldCorrections, List<Map<String,String>> lineItemCorrections, boolean approve) throws Exception {
+        ExtractionResult existing = store.get(id);
+        if (existing == null) throw new IllegalArgumentException("Unknown submission id");
+        Map<String,Field> fields = new LinkedHashMap<>(existing.fields());
+        if (fieldCorrections != null) for (var entry : fieldCorrections.entrySet()) {
+            if (!IntakeSchema.FIELDS.contains(entry.getKey())) throw new IllegalArgumentException("Unknown field: "+entry.getKey());
+            fields.put(entry.getKey(), corrected(entry.getKey(), entry.getValue()));
+        }
+        List<Map<String,Field>> rows = new ArrayList<>();
+        for (int i=0; i<existing.lineItems().size(); i++) {
+            Map<String,Field> row = new LinkedHashMap<>(existing.lineItems().get(i));
+            Map<String,String> rowCorrections = lineItemCorrections!=null && i<lineItemCorrections.size() ? lineItemCorrections.get(i) : null;
+            if (rowCorrections != null) for (var entry : rowCorrections.entrySet()) {
+                if (!IntakeSchema.CELLS.contains(entry.getKey())) throw new IllegalArgumentException("Unknown line item cell: "+entry.getKey());
+                row.put(entry.getKey(), corrected(entry.getKey(), entry.getValue()));
+            }
+            rows.add(row);
+        }
+        List<String> missing=new ArrayList<>(), queue=new ArrayList<>();
+        for (String name : IntakeSchema.FIELDS) {
+            Field field = fields.get(name);
+            if (field.value()==null && field.status().equals("MISSING")) missing.add(name);
+            if (!Set.of("ACCEPTED","MISSING").contains(field.status())) queue.add(name);
+        }
+        for (int i=0; i<rows.size(); i++) for (String cell : IntakeSchema.CELLS) {
+            if (!rows.get(i).get(cell).status().equals("ACCEPTED")) queue.add("lineItems["+i+"]."+cell);
+        }
+        queue.addAll(existing.issues());
+        String status = !queue.isEmpty() ? "MANUAL_REVIEW" : !missing.isEmpty() ? "MISSING_INFORMATION" : "COMPLETE";
+        String approvalStatus = approve ? "APPROVED" : existing.approvalStatus();
+        ExtractionResult result = new ExtractionResult(existing.submissionId(), existing.inputHash(), existing.documentType(),
+                existing.provider(), existing.pipelineVersion(), existing.createdAt(), status, fields, rows, missing, queue,
+                existing.issues(), existing.pageCount(), approvalStatus);
+        store.audit(existing.submissionId(), Map.of("stage","HUMAN_REVIEW","timestamp",Instant.now().toString(),
+                "correctedFields", fieldCorrections==null?Map.of():fieldCorrections,
+                "correctedLineItems", lineItemCorrections==null?List.of():lineItemCorrections, "approved", approve));
+        store.save(result);
+        return result;
+    }
+    private Field corrected(String name, String rawValue) {
+        String value = IntakeSchema.canonical(name, rawValue);
+        if (value != null && !IntakeSchema.valid(name, value)) throw new IllegalArgumentException("Invalid value for "+name+": "+rawValue);
+        return new Field(value, value==null?0:1.0, "human-review", value==null?"MISSING":"ACCEPTED", List.of(), rawValue==null?"":rawValue);
     }
     private boolean usable(String text) { return text!=null && text.chars().filter(Character::isLetterOrDigit).count()>=12 && text.indexOf('\uFFFD')<0; }
     private Page attempt(String id,String hash,int page,String path,String text,double ocrConfidence) throws Exception {

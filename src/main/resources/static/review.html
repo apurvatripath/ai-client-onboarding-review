@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Human review queue for AI-extracted intake documents.">
+    <title>Review Queue | Intake Review</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles.css">
+    <script src="/review.js" defer></script>
+</head>
+<body>
+<header class="site-header">
+    <a class="brand" href="/" aria-label="Intake review demonstration home">
+        <span class="brand-mark" aria-hidden="true">AR</span>
+        <span>Intake Review</span>
+    </a>
+    <span class="demo-label">Human review queue</span>
+</header>
+
+<main class="review-main">
+    <aside class="review-queue" aria-label="Submissions awaiting review">
+        <h2>Queue</h2>
+        <p id="queue-empty" class="review-empty" hidden>Nothing is waiting on a person right now.</p>
+        <ul id="queue-list" class="queue-list"></ul>
+    </aside>
+
+    <section class="review-workspace" aria-label="Review workspace">
+        <p id="workspace-empty" class="review-empty">Pick a submission from the queue to review it.</p>
+
+        <div id="workspace" hidden>
+            <div class="review-topline">
+                <div>
+                    <p class="form-kicker" id="review-id"></p>
+                    <h2 id="review-heading">Review submission</h2>
+                </div>
+                <span id="review-badge" class="result-badge"></span>
+                <span id="review-approval" class="result-badge"></span>
+            </div>
+
+            <div id="review-status" class="form-status"></div>
+
+            <div class="review-grid">
+                <div class="document-pane">
+                    <iframe id="document-frame" title="Source document" class="document-frame"></iframe>
+                    <p id="document-missing" class="review-empty" hidden>Original file wasn't stored for this submission (processed before document capture was added).</p>
+                </div>
+
+                <div class="fields-pane">
+                    <h3>Extracted fields</h3>
+                    <div id="fields-list" class="fields-list"></div>
+
+                    <h3 id="line-items-heading" hidden>Service table</h3>
+                    <div id="line-items" class="line-items"></div>
+
+                    <div id="issues-wrapper" hidden>
+                        <h3>Issues</h3>
+                        <ul id="issues-list"></ul>
+                    </div>
+
+                    <div class="review-actions">
+                        <button id="save-button" class="secondary-button" type="button">Save corrections</button>
+                        <button id="approve-button" type="button">Save &amp; approve</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+</body>
+</html>
